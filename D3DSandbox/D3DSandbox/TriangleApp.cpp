@@ -5,10 +5,12 @@ void TriangleApp::Prepare() {
     Vertex triangleVertices[] = {
 { {  1.0f, 1.0f, 0.5f }, { 1.0f, 0.0f,0.0f,1.0f} },
 { { 1.0f,-1.0f, 0.5f }, { 0.0f, 0.0f,1.0f,1.0f} },
-{ {-1.0f,1.0f, 1.0f }, { 0.0f, 0.0f,1.0f,1.0f} },
-{ {0.5f,0.5f, 0.5f }, { 0.0f, 1.0f,1.0f,1.0f} },
+{ {-1.0f,1.0f, 0.5f }, { 0.0f, 0.0f,1.0f,1.0f} },
+{ {-1.0f,-1.0f, 0.5f }, { 0.0f, 1.0f,1.0f,1.0f} },
+{ { 0.5f,0.5f, 0.5f }, { 0.0f, 0.0f,1.0f,1.0f} },
+{ {-0.5f,0.5f, 0.5f }, { 0.0f, 0.0f,1.0f,1.0f} },
     };
-    uint32_t indices[] = { 0, 1, 2 , 3};
+    uint32_t indices[] = { 0, 1, 2 , 3, 4, 5};
 
 
     m_vertexBuffer = CreateBuffer(sizeof(triangleVertices), triangleVertices);
@@ -65,7 +67,7 @@ void TriangleApp::Prepare() {
     psoDesc.InputLayout = { inputElementDesc, _countof(inputElementDesc) };
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     psoDesc.pRootSignature = m_rootSignature.Get();
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
     psoDesc.SampleDesc = { 1,0 };
     psoDesc.SampleMask = UINT_MAX; // これを忘れると絵が出ない＆警告も出ないので注意.
 
@@ -97,7 +99,7 @@ void TriangleApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     command->RSSetScissorRects(1, &m_scissorRect);
 
     // プリミティブタイプ、頂点・インデックスバッファのセット
-    command->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    command->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
     command->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     command->IASetIndexBuffer(&m_indexBufferView);
 

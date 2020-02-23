@@ -63,6 +63,7 @@ protected:
     std::vector<UINT64> m_frameFenceValues;
 
     ComPtr<ID3D12GraphicsCommandList> m_commandList;
+    
 
     UINT m_frameIndex;
 
