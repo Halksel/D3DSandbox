@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 #include <stdexcept>
-#include "CubeApp.h"
+#include "TriangleApp.h"
 
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
@@ -28,7 +28,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
-	CubeApp theApp{};
+	TriangleApp theApp{};
 
 	WNDCLASSEX wc{};
 	wc.cbSize = sizeof(wc);

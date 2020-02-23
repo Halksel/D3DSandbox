@@ -13,6 +13,6 @@ VSOutput main( VSInput In )
 {
 	VSOutput result = (VSOutput)0;
 	result.Position = In.Position;
-	result.Color = In.Position;
+	result.Color = In.Color;
 	return result;
 }
