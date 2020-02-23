@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <stdexcept>
+#include "MySandbox.h"
 #include "TriangleApp.h"
 
 const int WINDOW_WIDTH = 640;
@@ -28,7 +29,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
-	TriangleApp theApp{};
+	MySandbox theApp{};
 
 	WNDCLASSEX wc{};
 	wc.cbSize = sizeof(wc);
