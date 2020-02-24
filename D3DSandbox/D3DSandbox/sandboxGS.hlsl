@@ -25,7 +25,7 @@ void main(point GSInput In[1], uint PrimitiveID : SV_PrimitiveID, inout Triangle
 	GSOutput v0, v1, v2, v3;
 	float size = 0.1;
 	//float4 color = colors[PrimitiveID]; 
-	float4 color = float4(PrimitiveID * 0.1f, PrimitiveID * 0.1f, PrimitiveID * 0.1f, PrimitiveID * 0.1f);
+    float4 color = In[0].Color;
 	v0.Position = In[0].Position + float4(-size, size, 0, 0);
 	v0.Color = color;
 	v1.Position = In[0].Position + float4(size, size, 0, 0);

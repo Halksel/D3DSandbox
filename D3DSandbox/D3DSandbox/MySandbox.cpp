@@ -13,11 +13,16 @@ void MySandbox::Prepare() {
 
 
 	Vertex pointVertices[] = {
-{ {  0.0f, 0.0f, 0.0f }, magenta},
+{ {  -1.0f, -1.0f, 0.0f }, blue},
+{ { 0.0f,1.0f, 0.0f }, white },
+{ {  1.0f, -1.0f, 0.0f }, cyan},
+{ { 0.0f,1.0f, 0.0f }, cyan},
+{ {  0.0f, 0.0f, 0.0f }, blue},
+{ {  0.0f, 0.1f, 0.0f }, white},
 { { 0.5f,0.0f, 0.0f }, white },
 { { 0.5f,0.5f, 0.0f }, cyan},
 	};
-	uint32_t indices[] = { 0,1,2 ,1, 3 ,2  };
+	uint32_t indices[] = { 0,1,2};
 
 
 	m_vertexBuffer = CreateBuffer(sizeof(pointVertices), pointVertices);
@@ -48,8 +53,14 @@ void MySandbox::Prepare() {
 		OutputDebugStringA((const char*)errBlob->GetBufferPointer());
 	}
 
+	CD3DX12_DESCRIPTOR_RANGE cbv;
+	cbv.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0); // b0 レジスタ
+
+	CD3DX12_ROOT_PARAMETER rootParams[1];
+	rootParams[0].InitAsDescriptorTable(1, &cbv, D3D12_SHADER_VISIBILITY_VERTEX);
+
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{};
-	rootSigDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSigDesc.Init(_countof(rootParams), rootParams, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ComPtr<ID3DBlob> signature;
 	hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &errBlob);
 	if (FAILED(hr)) {
@@ -89,6 +100,25 @@ void MySandbox::Prepare() {
 	{
 		throw std::runtime_error("CreateGraphicsPipelineState failed");
 	}
+
+	PrepareDescriptorHeapForSandboxApp();
+
+	// 定数バッファ/定数バッファビューの生成
+	m_constantBuffers.resize(FrameBufferCount);
+	m_cbViews.resize(FrameBufferCount);
+	for (UINT i = 0; i < FrameBufferCount; ++i)
+	{
+		UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
+		m_constantBuffers[i] = CreateBuffer(bufferSize, nullptr);
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
+		cbDesc.BufferLocation = m_constantBuffers[i]->GetGPUVirtualAddress();
+		cbDesc.SizeInBytes = bufferSize;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handleCBV(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
+		m_device->CreateConstantBufferView(&cbDesc, handleCBV);
+
+		m_cbViews[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
+	}
 }
 
 void MySandbox::Cleanup()
@@ -103,6 +133,30 @@ void MySandbox::Cleanup()
 
 void MySandbox::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 {
+	using namespace DirectX;
+
+	// 各行列のセット.
+	ShaderParameters shaderParams;
+	XMStoreFloat4x4(&shaderParams.mtxWorld, XMMatrixRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XMConvertToRadians(45.0f)));
+	auto mtxView = XMMatrixLookAtLH(
+		XMVectorSet(4.0f, 3.0f, 0.0f, 0.0f),
+		XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+	);
+	auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), m_viewport.Width / m_viewport.Height, 0.1f, 100.0f);
+	XMStoreFloat4x4(&shaderParams.mtxView, XMMatrixTranspose(mtxView));
+	XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
+
+	// 定数バッファの更新.
+	auto& constantBuffer = m_constantBuffers[m_frameIndex];
+	{
+		void* p;
+		CD3DX12_RANGE range(0, 0);
+		constantBuffer->Map(0, &range, &p);
+		memcpy(p, &shaderParams, sizeof(shaderParams));
+		constantBuffer->Unmap(0, nullptr);
+	}
+	
 	// パイプラインステートのセット
 	command->SetPipelineState(m_pipeline.Get());
 	// ルートシグネチャのセット
@@ -110,11 +164,18 @@ void MySandbox::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 	// ビューポートとシザーのセット
 	command->RSSetViewports(1, &m_viewport);
 	command->RSSetScissorRects(1, &m_scissorRect);
+	// ディスクリプタヒープをセット.
+	ID3D12DescriptorHeap* heaps[] = {
+	  m_heapSrvCbv.Get()
+	};
+	command->SetDescriptorHeaps(_countof(heaps), heaps);
 
 	// プリミティブタイプ、頂点・インデックスバッファのセット
 	command->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	command->IASetVertexBuffers(0, 1, &m_vertexBufferView);
 	command->IASetIndexBuffer(&m_indexBufferView);
+
+	command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
 
 	// 描画命令の発行
 	command->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
@@ -148,4 +209,20 @@ MySandbox::ComPtr<ID3D12Resource1> MySandbox::CreateBuffer(UINT bufferSize, cons
 	}
 
 	return buffer;
+}
+
+void MySandbox::PrepareDescriptorHeapForSandboxApp()
+{
+	// CBV/SRV のディスクリプタヒープ
+	//  0:シェーダーリソースビュー
+	//  1,2 : 定数バッファビュー (FrameBufferCount数分使用)
+	UINT count = FrameBufferCount + 1;
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
+	  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+	  count,
+	  D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+	  0
+	};
+	m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_heapSrvCbv));
+	m_srvcbvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
