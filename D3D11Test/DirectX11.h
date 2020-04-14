@@ -64,12 +64,14 @@ private:
 	ComPtr<IDXGISwapChain> m_pSwapChain;			// 画面出力用のスワップチェイン
 	ComPtr<ID3D11RenderTargetView> m_pRenderTargetView; //RTV
 	ComPtr<ID3D11DepthStencilView> m_pDepthStencilView; //DSV
+	ComPtr<ID3D11DepthStencilState> m_pDepthStencilState;
 
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;
 	D3D11_VIEWPORT m_Viewport;
 	InputLayout m_Inputlayout;
 
 	UINT m_pStride, m_pOffset;
+	int m_videoCardMemory;
 
 	// shaders
 	VertexShader m_vs;

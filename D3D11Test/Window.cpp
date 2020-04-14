@@ -58,7 +58,7 @@ bool SimpleWindow::Create(LPCTSTR pName, int x, int y, int width, int height)
 	Rect.right	= width;
 	Rect.bottom	= height;
 	// ウィンドウのスタイルに合わせた適切なサイズを取得する
-	AdjustWindowRect(&Rect, dwStyle, false);
+	//AdjustWindowRect(&Rect, dwStyle, false);
 
 	width = Rect.right - Rect.left;
 	height = Rect.bottom - Rect.top;

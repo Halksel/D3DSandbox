@@ -9,8 +9,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	desc.Name = TEXT("DirectX11");
 	desc.X = 0;
 	desc.Y = 0;
-	desc.Width = 1280;
-	desc.Height = 720;
+	desc.Width = 480;
+	desc.Height = 640;
 
 	Framework& framework = Framework::GetInstance();
 	if (!framework.Initialize(desc))

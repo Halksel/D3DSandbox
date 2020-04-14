@@ -25,14 +25,58 @@
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
+		IDXGIFactory* factory;
+		IDXGIAdapter* adapter;
+		IDXGIOutput* adapterOutput;
+		UINT numModes,  i, numerator, denominator;
+		DXGI_MODE_DESC* displayModeList;
+		DXGI_ADAPTER_DESC adapterDesc;
+		CreateDXGIFactory(IID_PPV_ARGS(&factory));
+		factory->EnumAdapters(0, &adapter);
+		adapter->EnumOutputs(0, &adapterOutput);
+		adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
+		displayModeList = new DXGI_MODE_DESC[numModes];
+		adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
+
+		for (i = 0; i < numModes; i++)
+		{
+			if (displayModeList[i].Width == (UINT)window.GetWidth())
+			{
+				if (displayModeList[i].Height == (UINT)window.GetHeight())
+				{
+					numerator = displayModeList[i].RefreshRate.Numerator;
+					denominator = displayModeList[i].RefreshRate.Denominator;
+				}
+			}
+		}
+
+		adapter->GetDesc(&adapterDesc);
+		m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+
+		// Release the display mode list.
+		delete [] displayModeList;
+		displayModeList = 0;
+
+		// Release the adapter output.
+		adapterOutput->Release();
+		adapterOutput = 0;
+
+		// Release the adapter.
+		adapter->Release();
+		adapter = 0;
+
+		// Release the factory.
+		factory->Release();
+		factory = 0;
+
 		DXGI_SWAP_CHAIN_DESC desc{};
 		// バッファ情報の設定
 		desc.BufferCount = 1;
 		desc.BufferDesc.Width = window.GetWidth();
 		desc.BufferDesc.Height = window.GetHeight();
 		desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		desc.BufferDesc.RefreshRate.Numerator = 60;
-		desc.BufferDesc.RefreshRate.Denominator = 1;
+		desc.BufferDesc.RefreshRate.Numerator = numerator;
+		desc.BufferDesc.RefreshRate.Denominator = denominator;
 		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		// MSAAの設定
 		desc.SampleDesc.Count = 1;
@@ -49,7 +93,6 @@
 			//D3D_FEATURE_LEVEL_10_0,	// DirectX 10.0
 		};
 		UINT NumFeatureLevels = ARRAYSIZE(FeatureLevels);
-
 
 
 		//	デバイスを作成
@@ -69,23 +112,31 @@
 		);
 		if (FAILED(hr))
 		{
+			OutputDebugString(L"CreateDeviceで失敗.\n");
 			return false;
 		}
-		ComPtr<ID3D11Texture2D> pBackBuffer;
-		//	ID3D11Texture2D* pBackBuffer;
+		//ComPtr<ID3D11Texture2D> pBackBuffer;
+		ID3D11Texture2D* pBackBuffer = 0;
 
 		hr = m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
 		if (FAILED(hr))
-			return false;
-
-		hr = m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &m_pRenderTargetView);
-
-		if (FAILED(hr))
 		{
+			OutputDebugString(L"GetBufferで失敗.\n");
 			return false;
 		}
 
-	//	m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, NULL);
+		hr = m_pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_pRenderTargetView);
+
+		if (FAILED(hr))
+		{
+			OutputDebugString( L"CreateRenderTargetView [Backbuffer] failed.\n" );
+			return false;
+		}
+		if (pBackBuffer) {
+
+		pBackBuffer->Release();
+		pBackBuffer = nullptr;
+		}
 
 		// 深度バッファの用意
 		D3D11_TEXTURE2D_DESC txDesc;
@@ -103,7 +154,42 @@
 		txDesc.CPUAccessFlags = 0;
 		txDesc.MiscFlags = 0;
 
-		hr = m_pDevice->CreateTexture2D(&txDesc, NULL, &pBackBuffer);
+		
+		ID3D11Texture2D* pDepthStencil = 0;
+		hr = m_pDevice->CreateTexture2D(&txDesc, NULL, &pDepthStencil);
+
+
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;                  
+		depthStencilDesc.DepthEnable = true;
+		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+		depthStencilDesc.StencilEnable = true;
+		depthStencilDesc.StencilReadMask = 0xFF;
+		depthStencilDesc.StencilWriteMask = 0xFF;
+
+		// Stencil operations if pixel is front-facing.
+		depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+		// Stencil operations if pixel is back-facing.
+		depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+		// Create the depth stencil state.
+		hr = m_pDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilState);
+		if(FAILED(hr))
+		{
+			return false;
+		}
+
+		// Set the depth stencil state.
+		m_pDeviceContext->OMSetDepthStencilState(m_pDepthStencilState.Get(), 1);
+
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC dsDesc;
 		ZeroMemory(&dsDesc, sizeof(dsDesc));
@@ -111,12 +197,19 @@
 		dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		dsDesc.Texture2D.MipSlice = 0;
 
-		hr = m_pDevice->CreateDepthStencilView(pBackBuffer.Get(), &dsDesc, &m_pDepthStencilView);
-		if (FAILED(hr))
-			return false;
+		hr = m_pDevice->CreateDepthStencilView(pDepthStencil, &dsDesc, &m_pDepthStencilView);
 
-		if (!CompileShaders())
+		if (pDepthStencil) {
+			pDepthStencil->Release();
+			pDepthStencil = nullptr;
+		}
+
+		if (FAILED(hr)) {
+			OutputDebugString(L"CreateDepthStencilView failed");
 			return false;
+		}
+
+		m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView.Get());
 
 
 		m_Viewport.TopLeftX = 0;
@@ -125,16 +218,14 @@
 		m_Viewport.Height = (float)window.GetHeight();
 		m_Viewport.MinDepth = 0.0f;
 		m_Viewport.MaxDepth = 1.0f;
+
 		m_pDeviceContext->RSSetViewports(1, &m_Viewport);
+
+		if (!CompileShaders())
+			return false;
 
 		if (!CreateVertice())
 			return false;
-
-		m_pDeviceContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &m_pStride, &m_pOffset);
-		m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pDeviceContext->IASetInputLayout(m_Inputlayout.GetInputLayout());
-		m_pDeviceContext->VSSetShader(m_vs.GetShader(), NULL, 0);
-		m_pDeviceContext->PSSetShader(m_ps.GetShader(), NULL, 0);
 
 		return true;
 	}
@@ -142,6 +233,12 @@
 	// 終了処理
 	void DirectX11::Finalize(void)
 	{
+		if (m_pDeviceContext) {
+			m_pDeviceContext->ClearState();
+		}
+		if (m_pDepthStencilView) {
+		//	m_pDepthStencilView->Release();
+		}
 	}
 
 	bool DirectX11::CompileShaders() {
@@ -157,12 +254,12 @@
 	bool DirectX11::CreateVertice() {
 		HRESULT hr;
 		Vertex vertexList[]{
-				{ {  0.0f,  0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+				{ { -0.5f,  0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
 				{ {  0.5f, -0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
 				{ { -0.5f, -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
 		};
 		D3D11_INPUT_ELEMENT_DESC vertexDesc[]{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,                            0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,    0,                            0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
@@ -251,9 +348,18 @@
 		if (nullptr == m_pDeviceContext) return;
 		if (nullptr == m_pSwapChain) return;
 		if (nullptr == m_pRenderTargetView) return;
+		if (nullptr == m_pDepthStencilView) return;
 		float clearColor[4] = { 0.0f, 0.0f, 1.0f, 1.0f }; //red,green,blue,alpha
+		
+		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), clearColor);
+		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 		 
-		//m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), clearColor);
+		m_pDeviceContext->IASetInputLayout(m_Inputlayout.GetInputLayout());
+		m_pDeviceContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &m_pStride, &m_pOffset);
+		m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_pDeviceContext->VSSetShader(m_vs.GetShader(), NULL, 0);
+		m_pDeviceContext->PSSetShader(m_ps.GetShader(), NULL, 0);
+
 		m_pDeviceContext->Draw(3, 0);
 		m_pSwapChain->Present(0, 0);
 
