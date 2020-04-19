@@ -6,13 +6,7 @@
 
 CameraClass::CameraClass()
 {
-	m_positionX = 0.0f;
-	m_positionY = 0.0f;
-	m_positionZ = 10.0f;
-
-	m_rotationX = 0.0f;
-	m_rotationY = 0.0f;
-	m_rotationZ = 0.0f;
+	Initialize();
 }
 
 
@@ -23,6 +17,18 @@ CameraClass::CameraClass(const CameraClass& other)
 
 CameraClass::~CameraClass()
 {
+}
+
+void CameraClass::Initialize() {
+	m_positionX = 0.0f;
+	m_positionY = 0.0f;
+	m_positionZ = -25.0f;
+
+	m_rotationX = 0.0f;
+	m_rotationY = 0.0f;
+	m_rotationZ = 0.0f;
+
+	m_state = CameraControlState::Position;
 }
 
 
@@ -107,6 +113,36 @@ void CameraClass::Render()
 	m_viewMatrix = XMMatrixLookAtLH(positionVector, lookAtVector, upVector);
 
 	return;
+}
+
+void CameraClass::Update(InputClass* input)
+{
+	if (input->IsKeyTrigger(DIK_0)) {
+		//m_state = static_cast<CameraControlState>(NextEnum<CameraControlState>(m_state) % static_cast<UINT>(CameraControlState::MAX));
+		Initialize();
+	}
+
+	if (input->IsKeyTrigger(DIK_1)) {
+		m_intState = static_cast<int>(m_state);
+		m_intState = (m_intState + 1) % static_cast<int>(CameraControlState::MAX);
+		m_state = static_cast<CameraControlState>(m_intState);
+	}
+
+	XMFLOAT2 dir = input->GetAxis(true);
+
+	switch (m_state)
+	{
+	case CameraControlState::Position:
+		m_positionX += dx * dir.x;
+		m_positionY += dy * dir.y;
+		break;
+	case CameraControlState::Rotation:
+		m_rotationX += dx * dir.x;
+		m_rotationY += dy * dir.y;
+		break;
+	default:
+		break;
+	}
 }
 
 

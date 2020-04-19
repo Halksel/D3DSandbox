@@ -124,12 +124,13 @@ void GraphicsClass::Shutdown()
 }
 
 
-bool GraphicsClass::Frame()
+bool GraphicsClass::Frame(InputClass* input)
 {
 	bool result;
 
 
 	// Render the graphics scene.
+	m_Camera->Update(input);
 	result = Render();
 	if(!result)
 	{
