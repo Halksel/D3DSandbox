@@ -43,7 +43,7 @@ private:
 private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
-	ModelClass* m_Model;
+	SquareDrawer* m_Square;
 	TextureShaderClass* m_TextureShader;
 };
 

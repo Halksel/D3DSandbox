@@ -8,18 +8,18 @@
 //////////////
 // INCLUDES //
 //////////////
-#include <d3d11.h>
 #include <directxmath.h>
 using namespace DirectX;
 
 #include "textureclass.h"
 #include "utility.h"
+#include "Object/object.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: ModelClass
 ////////////////////////////////////////////////////////////////////////////////
-class ModelClass
+class SquareDrawer : ObjectDrawer
 {
 private:
 	struct VertexType
@@ -29,13 +29,14 @@ private:
 	};
 
 public:
-	ModelClass();
-	ModelClass(const ModelClass&);
-	~ModelClass();
+	SquareDrawer();
+	SquareDrawer(const SquareDrawer&);
+	~SquareDrawer();
 
 	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
-	void Shutdown();
+	void Update();
 	void Render(ID3D11DeviceContext*);
+	void Shutdown();
 
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();

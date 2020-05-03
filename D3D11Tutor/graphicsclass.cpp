@@ -8,7 +8,7 @@ GraphicsClass::GraphicsClass()
 {
 	m_Direct3D = 0;
 	m_Camera = 0;
-	m_Model = 0;
+	m_Square = 0;
 	m_TextureShader = 0;
 }
 
@@ -54,14 +54,14 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(0.0f, 0.0f, -25.0f);
 
 	// Create the model object.
-	m_Model = new ModelClass;
-	if (!m_Model)
+	m_Square = new SquareDrawer;
+	if (!m_Square)
 	{
 		return false;
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/water02.tga");
+	result = m_Square->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/water02.tga");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -98,11 +98,11 @@ void GraphicsClass::Shutdown()
 	}
 
 	// Release the model object.
-	if (m_Model)
+	if (m_Square)
 	{
-		m_Model->Shutdown();
-		delete m_Model;
-		m_Model = 0;
+		m_Square->Shutdown();
+		delete m_Square;
+		m_Square = 0;
 	}
 
 	// Release the camera object.
@@ -159,10 +159,10 @@ bool GraphicsClass::Render()
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_Model->Render(m_Direct3D->GetDeviceContext());
+	m_Square->Render(m_Direct3D->GetDeviceContext());
 
 	// Render the model using the texture shader.
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture());
+	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Square->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Square->GetTexture());
 	if (!result)
 	{
 		return false;

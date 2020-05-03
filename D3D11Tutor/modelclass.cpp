@@ -4,7 +4,7 @@
 #include "modelclass.h"
 
 
-ModelClass::ModelClass()
+SquareDrawer::SquareDrawer()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
@@ -12,17 +12,17 @@ ModelClass::ModelClass()
 }
 
 
-ModelClass::ModelClass(const ModelClass& other)
+SquareDrawer::SquareDrawer(const SquareDrawer& other)
 {
 }
 
 
-ModelClass::~ModelClass()
+SquareDrawer::~SquareDrawer()
 {
 }
 
 
-bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
+bool SquareDrawer::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
 {
 	bool result;
 
@@ -46,8 +46,12 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 	return true;
 }
 
+void SquareDrawer::Update()
+{
+}
 
-void ModelClass::Shutdown()
+
+void SquareDrawer::Shutdown()
 {
 	ReleaseTexture();
 	// Shutdown the vertex and index buffers.
@@ -57,7 +61,7 @@ void ModelClass::Shutdown()
 }
 
 
-void ModelClass::Render(ID3D11DeviceContext* deviceContext)
+void SquareDrawer::Render(ID3D11DeviceContext* deviceContext)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
@@ -66,18 +70,18 @@ void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 }
 
 
-int ModelClass::GetIndexCount()
+int SquareDrawer::GetIndexCount()
 {
 	return m_indexCount;
 }
 
-ID3D11ShaderResourceView* ModelClass::GetTexture()
+ID3D11ShaderResourceView* SquareDrawer::GetTexture()
 {
 	return m_Texture->GetTexture();
 }
 
 
-bool ModelClass::InitializeBuffers(ID3D11Device* device)
+bool SquareDrawer::InitializeBuffers(ID3D11Device* device)
 {
 	VertexType* vertices;
 	unsigned long* indices;
@@ -175,7 +179,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 }
 
 
-void ModelClass::ShutdownBuffers()
+void SquareDrawer::ShutdownBuffers()
 {
 	// Release the index buffer.
 	if(m_indexBuffer)
@@ -195,7 +199,7 @@ void ModelClass::ShutdownBuffers()
 }
 
 
-void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+void SquareDrawer::RenderBuffers(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -217,7 +221,7 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR filename)
+bool SquareDrawer::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR filename)
 {
 	bool result;
 
@@ -240,7 +244,7 @@ bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceCo
 	return true;
 }
 
-void ModelClass::ReleaseTexture()
+void SquareDrawer::ReleaseTexture()
 {
 	// Release the texture object.
 	if (m_Texture)

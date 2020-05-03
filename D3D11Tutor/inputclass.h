@@ -8,6 +8,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <DirectXMath.h>
+#include<string>
 // キー最大数
 #define KEY_MAX 256
 
@@ -36,8 +37,10 @@ public:
    bool IsKeyDown(UINT index);
    XMFLOAT2 GetAxis(bool isTrigger);
 
-private:
-   // トリガーの入力
+   //InputProxy* CreateCurrentProxy(std::string label);
+   //InputProxy* CreateTopPriorityProxy(std::string label);
+   //void RemoveProxy(InputProxy*);
+
 private:
    // インプットの生成
    HRESULT CreateInput(void);
@@ -58,6 +61,13 @@ private:
    BYTE keys[KEY_MAX];
    // 前のキー情報
    BYTE olds[KEY_MAX];
+
+   void UpdateProxy();
 };
+
+	class InputProxy {
+	public:
+		InputProxy();
+	};
 
 #endif

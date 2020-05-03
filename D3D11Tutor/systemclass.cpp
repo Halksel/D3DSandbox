@@ -44,6 +44,16 @@ bool SystemClass::Initialize()
 	// Initialize the input object.
 	m_Input->Initialize(m_hwnd);
 
+	m_Game = new GameClass;
+	if (!m_Game)
+	{
+		return false;
+	}
+	result = m_Game->Initialize(screenWidth, screenHeight);
+	if (!result) {
+		return false;
+	}
+
 	// Create the graphics object.  This object will handle rendering all the graphics for this application.
 	m_Graphics = new GraphicsClass;
 	if(!m_Graphics)
@@ -70,6 +80,12 @@ void SystemClass::Shutdown()
 		m_Graphics->Shutdown();
 		delete m_Graphics;
 		m_Graphics = 0;
+	}
+
+	if (m_Game) {
+		m_Game->Shutdown();
+		delete m_Game;
+		m_Game = 0;
 	}
 
 	// Release the input object.
