@@ -22,10 +22,10 @@ SquareDrawer::~SquareDrawer()
 }
 
 
-bool SquareDrawer::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
+bool SquareDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
 {
+	if (m_initialized) return true;
 	bool result;
-
 
 	// Initialize the vertex and index buffers.
 	result = InitializeBuffers(device);
@@ -36,12 +36,13 @@ bool SquareDrawer::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	}
 
 	// Load the texture for this model.
-	result = LoadTexture(device, deviceContext, textureFilename);
+	result = LoadTexture(hwnd, device, deviceContext, textureFilename);
 	if (!result)
 	{
 		MyOutputDebugString(L"Failed TextureLoad %s", textureFilename);
 		return false;
 	}
+	m_initialized = true;
 
 	return true;
 }
@@ -56,15 +57,23 @@ void SquareDrawer::Shutdown()
 	ReleaseTexture();
 	// Shutdown the vertex and index buffers.
 	ShutdownBuffers();
+	
 
 	return;
 }
 
+void SquareDrawer::SetSquare(Square* obj)
+{
+	m_obj = obj;
+}
 
-void SquareDrawer::Render(ID3D11DeviceContext* deviceContext)
+
+void SquareDrawer::Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
+
+	m_TextureShader->Render(deviceContext, m_indexCount, world, view, proj, m_Texture->GetTexture());
 
 	return;
 }
@@ -111,13 +120,13 @@ bool SquareDrawer::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// Load the vertex array with data.
-	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  // Bottom left.
+	vertices[0].position = m_obj->GetPoint(0);  // ¶‰º
 	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
-	vertices[1].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);  // Top middle.
+	vertices[1].position = m_obj->GetPoint(1);  // ¶ã
 	vertices[1].texture = XMFLOAT2(0.0f, 0.0f);
-	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
+	vertices[2].position = m_obj->GetPoint(2);  // ‰E‰º
 	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
-	vertices[3].position = XMFLOAT3(1.0f, 1.0f, 0.0f);  // Bottom left.
+	vertices[3].position = m_obj->GetPoint(3);  // ‰Eã
 	vertices[3].texture = XMFLOAT2(1.0f, 0.0f);
 
 	// Load the index array with data.
@@ -221,7 +230,7 @@ void SquareDrawer::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool SquareDrawer::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR filename)
+bool SquareDrawer::LoadTexture(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR filename)
 {
 	bool result;
 
@@ -241,6 +250,20 @@ bool SquareDrawer::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* device
 		return false;
 	}
 
+	m_TextureShader = new TextureShaderClass;
+	if (!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_TextureShader->Initialize(device, hwnd);
+	if (!result)
+	{
+		MyOutputDebugString(L"failed loadTexture %s", filename);
+		return false;
+	}
+
 	return true;
 }
 
@@ -252,6 +275,12 @@ void SquareDrawer::ReleaseTexture()
 		m_Texture->Shutdown();
 		delete m_Texture;
 		m_Texture = 0;
+	}
+
+	if (m_TextureShader) {
+		m_TextureShader->Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
 	}
 
 	return;

@@ -12,6 +12,7 @@
 using namespace DirectX;
 
 #include "textureclass.h"
+#include "textureshaderclass.h"
 #include "utility.h"
 #include "Object/object.h"
 
@@ -19,7 +20,10 @@ using namespace DirectX;
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: ModelClass
 ////////////////////////////////////////////////////////////////////////////////
-class SquareDrawer : ObjectDrawer
+
+class Square;
+
+class SquareDrawer : public ObjectDrawer
 {
 private:
 	struct VertexType
@@ -33,10 +37,11 @@ public:
 	SquareDrawer(const SquareDrawer&);
 	~SquareDrawer();
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
+	bool Initialize(HWND, ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
 	void Update();
-	void Render(ID3D11DeviceContext*);
+	void Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj);
 	void Shutdown();
+	void SetSquare(Square*);
 
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();
@@ -46,7 +51,7 @@ private:
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 
-	bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
+	bool LoadTexture(HWND, ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
 	void ReleaseTexture();
 
 
@@ -54,6 +59,8 @@ private:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
 	TextureClass* m_Texture;
+	TextureShaderClass* m_TextureShader;
+	Square* m_obj;
 };
 
 #endif

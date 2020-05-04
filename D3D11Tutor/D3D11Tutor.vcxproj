@@ -149,6 +149,7 @@
     <ClCompile Include="modelclass.cpp" />
     <ClCompile Include="Object\object.cpp" />
     <ClCompile Include="Object\objectdrawer.cpp" />
+    <ClCompile Include="singleton.cpp" />
     <ClCompile Include="systemclass.cpp" />
     <ClCompile Include="textureclass.cpp" />
     <ClCompile Include="textureshaderclass.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="modelclass.h" />
     <ClInclude Include="Object\object.h" />
     <ClInclude Include="Object\objectdrawer.h" />
+    <ClInclude Include="singleton.h" />
     <ClInclude Include="systemclass.h" />
     <ClInclude Include="textureclass.h" />
     <ClInclude Include="textureshaderclass.h" />

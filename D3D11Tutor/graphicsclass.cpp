@@ -4,16 +4,15 @@
 #include "graphicsclass.h"
 
 
-GraphicsClass::GraphicsClass()
+GraphicsClass::GraphicsClass() : m_Game(Singleton<GameClass>::get_instance())
 {
 	m_Direct3D = 0;
 	m_Camera = 0;
-	m_Square = 0;
 	m_TextureShader = 0;
 }
 
 
-GraphicsClass::GraphicsClass(const GraphicsClass& other)
+GraphicsClass::GraphicsClass(const GraphicsClass& other): m_Game(Singleton<GameClass>::get_instance())
 {
 }
 
@@ -54,14 +53,13 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(0.0f, 0.0f, -25.0f);
 
 	// Create the model object.
-	m_Square = new SquareDrawer;
-	if (!m_Square)
-	{
-		return false;
-	}
-
 	// Initialize the model object.
-	result = m_Square->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/water02.tga");
+	for(auto obj : m_Game.GetObjectHolder())
+	{
+		if (obj != nullptr) {
+			result &= obj->GetDrawer()->Initialize(hwnd, m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/water02.tga");
+		}
+	}
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -97,13 +95,6 @@ void GraphicsClass::Shutdown()
 		m_TextureShader = 0;
 	}
 
-	// Release the model object.
-	if (m_Square)
-	{
-		m_Square->Shutdown();
-		delete m_Square;
-		m_Square = 0;
-	}
 
 	// Release the camera object.
 	if (m_Camera)
@@ -124,7 +115,7 @@ void GraphicsClass::Shutdown()
 }
 
 
-bool GraphicsClass::Frame(InputClass* input)
+bool GraphicsClass::Frame(InputClass& input)
 {
 	bool result;
 
@@ -159,14 +150,13 @@ bool GraphicsClass::Render()
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_Square->Render(m_Direct3D->GetDeviceContext());
-
-	// Render the model using the texture shader.
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Square->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Square->GetTexture());
-	if (!result)
+	for(auto obj : m_Game.GetObjectHolder())
 	{
-		return false;
+		if (obj != nullptr) {
+			obj->GetDrawer()->Render(m_Direct3D->GetDeviceContext(), worldMatrix, viewMatrix, projectionMatrix);
+		}
 	}
+
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();

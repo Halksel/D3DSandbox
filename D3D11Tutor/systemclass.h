@@ -20,6 +20,7 @@
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
+#include "singleton.h"
 #include "inputclass.h"
 #include "graphicsclass.h"
 #include "gameclass.h"
@@ -51,9 +52,9 @@ private:
 	HINSTANCE m_hinstance;
 	HWND m_hwnd;
 
-	InputClass* m_Input;
-	GraphicsClass* m_Graphics;
-	GameClass* m_Game;
+	InputClass& m_Input;
+	GraphicsClass& m_Graphics;
+	GameClass& m_Game;
 };
 
 

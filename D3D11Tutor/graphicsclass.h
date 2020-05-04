@@ -12,6 +12,8 @@
 #include "cameraclass.h"
 #include "modelclass.h"
 #include "textureshaderclass.h"
+#include "gameclass.h"
+#include "singleton.h"
 
 
 /////////////
@@ -35,7 +37,7 @@ public:
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame(InputClass*);
+	bool Frame(InputClass&);
 
 private:
 	bool Render();
@@ -43,7 +45,7 @@ private:
 private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
-	SquareDrawer* m_Square;
+	GameClass& m_Game;
 	TextureShaderClass* m_TextureShader;
 };
 

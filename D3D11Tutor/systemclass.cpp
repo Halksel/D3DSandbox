@@ -4,14 +4,19 @@
 #include "systemclass.h"
 
 
-SystemClass::SystemClass()
+SystemClass::SystemClass():
+	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
+	m_Input( Singleton<InputClass>::get_instance()),
+	m_Game(Singleton<GameClass>::get_instance()),
+	m_Graphics(Singleton<GraphicsClass>::get_instance())
 {
-	m_Input = 0;
-	m_Graphics = 0;
 }
 
 
-SystemClass::SystemClass(const SystemClass& other)
+SystemClass::SystemClass(const SystemClass& other):
+	m_Input( Singleton<InputClass>::get_instance()),
+	m_Game(Singleton<GameClass>::get_instance()),
+	m_Graphics(Singleton<GraphicsClass>::get_instance())
 {
 }
 
@@ -34,35 +39,16 @@ bool SystemClass::Initialize()
 	// Initialize the windows api.
 	InitializeWindows(screenWidth, screenHeight);
 
-	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
-	m_Input = new InputClass;
-	if(!m_Input)
-	{
-		return false;
-	}
-
 	// Initialize the input object.
-	m_Input->Initialize(m_hwnd);
+	m_Input.Initialize(m_hwnd);
 
-	m_Game = new GameClass;
-	if (!m_Game)
-	{
-		return false;
-	}
-	result = m_Game->Initialize(screenWidth, screenHeight);
+	result = m_Game.Initialize(screenWidth, screenHeight);
 	if (!result) {
 		return false;
 	}
 
-	// Create the graphics object.  This object will handle rendering all the graphics for this application.
-	m_Graphics = new GraphicsClass;
-	if(!m_Graphics)
-	{
-		return false;
-	}
-
 	// Initialize the graphics object.
-	result = m_Graphics->Initialize(screenWidth, screenHeight, m_hwnd);
+	result = m_Graphics.Initialize(screenWidth, screenHeight, m_hwnd);
 	if(!result)
 	{
 		return false;
@@ -74,27 +60,6 @@ bool SystemClass::Initialize()
 
 void SystemClass::Shutdown()
 {
-	// Release the graphics object.
-	if(m_Graphics)
-	{
-		m_Graphics->Shutdown();
-		delete m_Graphics;
-		m_Graphics = 0;
-	}
-
-	if (m_Game) {
-		m_Game->Shutdown();
-		delete m_Game;
-		m_Game = 0;
-	}
-
-	// Release the input object.
-	if(m_Input)
-	{
-		delete m_Input;
-		m_Input = 0;
-	}
-
 	// Shutdown the window.
 	ShutdownWindows();
 	
@@ -146,17 +111,23 @@ void SystemClass::Run()
 bool SystemClass::Frame()
 {
 	bool result;
-	m_Input->Frame();
+	m_Input.Frame();
 
 
 	// Check if the user pressed escape and wants to exit the application.
-	if(m_Input->IsKeyDown(DIK_ESCAPE))
+	if(m_Input.IsKeyDown(DIK_ESCAPE))
+	{
+		return false;
+	}
+
+	result = m_Game.Frame(m_Input);
+	if(!result)
 	{
 		return false;
 	}
 
 	// Do the frame processing for the graphics object.
-	result = m_Graphics->Frame(m_Input);
+	result = m_Graphics.Frame(m_Input);
 	if(!result)
 	{
 		return false;

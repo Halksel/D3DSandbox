@@ -115,20 +115,20 @@ void CameraClass::Render()
 	return;
 }
 
-void CameraClass::Update(InputClass* input)
+void CameraClass::Update(InputClass& input)
 {
-	if (input->IsKeyTrigger(DIK_0)) {
+	if (input.IsKeyTrigger(DIK_0)) {
 		//m_state = static_cast<CameraControlState>(NextEnum<CameraControlState>(m_state) % static_cast<UINT>(CameraControlState::MAX));
 		Initialize();
 	}
 
-	if (input->IsKeyTrigger(DIK_1)) {
+	if (input.IsKeyTrigger(DIK_1)) {
 		m_intState = static_cast<int>(m_state);
 		m_intState = (m_intState + 1) % static_cast<int>(CameraControlState::MAX);
 		m_state = static_cast<CameraControlState>(m_intState);
 	}
 
-	XMFLOAT2 dir = input->GetAxis(true);
+	XMFLOAT2 dir = input.GetAxis(true);
 
 	switch (m_state)
 	{
