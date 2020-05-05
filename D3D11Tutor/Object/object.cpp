@@ -73,6 +73,7 @@ void Square::OnUpdate(const InputClass& input) {
 
 void Square::OnShutdown()
 {
+	m_Drawer->Shutdown();
 
 }
 
@@ -118,23 +119,29 @@ Circle::Circle()
 {
 }
 
-Circle::Circle(std::string name, XMFLOAT3 p0, float r)
+Circle::Circle(std::string name, XMFLOAT3 p0, float r, int num)
 {
+	m_Name = name;
+	m_Center = XMLoadFloat3( &p0);
+	m_Radius = r;
+	m_Strides = num;
+	m_Drawer = new CircleDrawer;
+	m_Drawer->SetCircle(this);
 }
 
 Circle& Circle::operator=(const Circle& r)
 {
-	m_center = r.m_center;
-	delete m_drawer;
-	m_drawer = r.m_drawer;
-	m_drawer->SetCircle(this);
+	m_Center = r.m_Center;
+	delete m_Drawer;
+	m_Drawer = r.m_Drawer;
+	m_Drawer->SetCircle(this);
 
 	return *this;
 }
 
 bool Circle::OnInitialize()
 {
-	return false;
+	return true;
 }
 
 void Circle::OnUpdate(const InputClass& input)
@@ -143,9 +150,25 @@ void Circle::OnUpdate(const InputClass& input)
 
 void Circle::OnShutdown()
 {
+	m_Drawer->Shutdown();
 }
 
 ObjectDrawer* Circle::GetDrawerSub()
 {
-	return nullptr;
+	return m_Drawer;
+}
+
+XMVECTOR Circle::GetCenter()
+{
+	return m_Center;
+}
+
+float Circle::GetRadius()
+{
+	return m_Radius;
+}
+
+int Circle::GetStrides()
+{
+	return m_Strides;
 }

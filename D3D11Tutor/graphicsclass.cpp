@@ -57,7 +57,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	for(auto obj : m_Game.GetObjectHolder())
 	{
 		if (obj != nullptr) {
-			result &= obj->GetDrawer()->Initialize(hwnd, m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/water02.tga");
+			result &= obj->GetDrawer()->Initialize(hwnd, m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/color.tga");
 		}
 	}
 	if (!result)

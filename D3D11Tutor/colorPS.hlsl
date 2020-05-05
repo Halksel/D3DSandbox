@@ -1,6 +1,6 @@
-//////////////
-// TYPEDEFS //
-//////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+
 struct PixelInputType
 {
     float4 position : SV_POSITION;

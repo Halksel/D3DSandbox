@@ -10,10 +10,11 @@ GameClass::GameClass() : square(Square()){
 
 bool GameClass::Initialize(int width, int height) {
 
+	AddObject(new Circle("ball", XMFLOAT3(0, -5, 0), 3, 50));
 	for (int j = 0; j < 4; ++j) {
 		for (int i = 0; i < 12; i++)
 		{
-			m_ObjectHolder[m_objIndex++] = new Square("test", XMFLOAT3(-6 + i, 8 - j, 0), XMFLOAT3(1, 1, 0));
+			AddObject(new Square("test", XMFLOAT3(-6 + i, 8 - j, 0), XMFLOAT3(1, 1, 0)));
 		}
 	}
 	return true;
@@ -43,6 +44,16 @@ bool GameClass::Frame(const InputClass& input) {
 void GameClass::SetCamera(CameraClass* camera)
 {
 	m_Camera = camera;
+}
+
+bool GameClass::AddObject(Object* obj)
+{
+	if (m_objIndex >= HolderSize) {
+		return false;
+	}
+
+	m_ObjectHolder[m_objIndex++] = obj;
+	return true;
 }
 
 std::vector<Object*> GameClass::GetObjectHolder()

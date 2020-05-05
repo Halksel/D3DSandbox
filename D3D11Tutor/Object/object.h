@@ -12,6 +12,8 @@
 
 using namespace DirectX;
 
+class ObjectDrawer;
+
 class Object {
 public:
 	Object();
@@ -46,9 +48,9 @@ class SquareDrawer;
 
 class Square : public Object {
 public:
-	Square();
-	Square(std::string name, XMFLOAT3 p0 = XMFLOAT3(), XMFLOAT3 p1 = XMFLOAT3());
-	Square(Square&&) = default;
+	explicit Square();
+	explicit Square(std::string name, XMFLOAT3 p0 = XMFLOAT3(), XMFLOAT3 p1 = XMFLOAT3());
+	explicit Square(Square&&) = default;
 	Square& operator=(const Square&);
 
 	bool OnInitialize() override;
@@ -75,9 +77,9 @@ class CircleDrawer;
 
 class Circle : public Object {
 public:
-	Circle();
-	Circle(std::string name, XMFLOAT3 p0, float r);
-	Circle(Circle&&) = default;
+	explicit Circle();
+	explicit Circle(std::string name, XMFLOAT3 p0, float r, int strides);
+	explicit Circle(Circle&&) = default;
 	Circle& operator=(const Circle&);
 
 	bool OnInitialize() override;
@@ -85,8 +87,13 @@ public:
 	void OnShutdown() override;
 	ObjectDrawer* GetDrawerSub() override;
 
-private:
-	XMVECTOR m_center;
-	CircleDrawer* m_drawer;
+	XMVECTOR GetCenter();
+	float GetRadius();
+	int GetStrides();
 
+private:
+	XMVECTOR m_Center;
+	float m_Radius;
+	int m_Strides;
+	CircleDrawer* m_Drawer;
 };

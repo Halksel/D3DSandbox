@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <tchar.h>
 
+#define PI 3.14159265
+
 #ifdef _DEBUG
 #   define MyOutputDebugString( str, ... ) \
       { \

@@ -4,7 +4,7 @@
 #include"inputclass.h"
 #include "d3dclass.h"
 #include "cameraclass.h"
-#include "modelclass.h"
+#include "Object/object.h"
 #include <vector>
 
 class GameClass {
@@ -14,6 +14,8 @@ public:
 	void Shutdown();
 	bool Frame(const InputClass&);
 	void SetCamera(CameraClass*);
+
+	bool AddObject(Object*);
 
 	std::vector < Object*> GetObjectHolder();
 
