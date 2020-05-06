@@ -27,47 +27,47 @@ using namespace DirectX;
 class InputClass
 {
 public:
-	InputClass();
-	InputClass(const InputClass&);
-	~InputClass();
+    InputClass();
+    InputClass(const InputClass&);
+    ~InputClass();
 
-	void Initialize(HWND);
+    void Initialize(HWND);
     void Frame();
-   bool IsKeyTrigger(UINT index);
-   bool IsKeyDown(UINT index);
-   XMFLOAT2 GetAxis(bool isTrigger);
+    bool IsKeyTrigger(UINT index);
+    bool IsKeyDown(UINT index);
+    XMFLOAT2 GetAxis(bool isTrigger);
 
-   //InputProxy* CreateCurrentProxy(std::string label);
-   //InputProxy* CreateTopPriorityProxy(std::string label);
-   //void RemoveProxy(InputProxy*);
+    //InputProxy* CreateCurrentProxy(std::string label);
+    //InputProxy* CreateTopPriorityProxy(std::string label);
+    //void RemoveProxy(InputProxy*);
 
 private:
-   // インプットの生成
-   HRESULT CreateInput(void);
-   // キーデバイスの生成
-   HRESULT CreateKey(void);
-   // キーフォーマットのセット
-   HRESULT SetKeyFormat(void);
-   // キーの協調レベルのセット
-   HRESULT SetKeyCooperative(HWND);
+    // インプットの生成
+    HRESULT CreateInput(void);
+    // キーデバイスの生成
+    HRESULT CreateKey(void);
+    // キーフォーマットのセット
+    HRESULT SetKeyFormat(void);
+    // キーの協調レベルのセット
+    HRESULT SetKeyCooperative(HWND);
 
-   // 参照結果
-   HRESULT result;
-   // インプット
-   LPDIRECTINPUT8 input;
-   // インプットデバイス
-   LPDIRECTINPUTDEVICE8 key;
-   // キー情報
-   BYTE keys[KEY_MAX];
-   // 前のキー情報
-   BYTE olds[KEY_MAX];
+    // 参照結果
+    HRESULT result;
+    // インプット
+    LPDIRECTINPUT8 input;
+    // インプットデバイス
+    LPDIRECTINPUTDEVICE8 key;
+    // キー情報
+    BYTE keys[KEY_MAX];
+    // 前のキー情報
+    BYTE olds[KEY_MAX];
 
-   void UpdateProxy();
+    void UpdateProxy();
 };
 
-	class InputProxy {
-	public:
-		InputProxy();
-	};
+class InputProxy {
+public:
+	InputProxy();
+};
 
 #endif

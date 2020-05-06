@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <tchar.h>
+#include <directxmath.h>
 
 #define PI 3.14159265
 

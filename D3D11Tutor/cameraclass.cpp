@@ -117,6 +117,7 @@ void CameraClass::Render()
 
 void CameraClass::Update(InputClass& input)
 {
+	return;
 	if (input.IsKeyTrigger(DIK_0)) {
 		//m_state = static_cast<CameraControlState>(NextEnum<CameraControlState>(m_state) % static_cast<UINT>(CameraControlState::MAX));
 		Initialize();

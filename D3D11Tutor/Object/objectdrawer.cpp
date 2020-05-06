@@ -4,25 +4,19 @@ ObjectDrawer::ObjectDrawer()
 {
 }
 
-SquareDrawer::SquareDrawer()
+RectDrawer& RectDrawer::operator=(const RectDrawer& r)
 {
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
-	m_Texture = 0;
+	// TODO: return ステートメントをここに挿入します
+	*this = RectDrawer(r);
+	return *this;
 }
 
-
-SquareDrawer::SquareDrawer(const SquareDrawer& other)
-{
-}
-
-
-SquareDrawer::~SquareDrawer()
+RectDrawer::~RectDrawer()
 {
 }
 
 
-bool SquareDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
+bool RectDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
 {
 	if (m_initialized) return true;
 	bool result;
@@ -47,12 +41,33 @@ bool SquareDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceConte
 	return true;
 }
 
-void SquareDrawer::Update()
+void RectDrawer::Update(ID3D11DeviceContext* deviceContext)
 {
+	D3D11_MAPPED_SUBRESOURCE Mappedresource;
+	deviceContext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &Mappedresource);
+
+	VertexType* verticesptr;
+	verticesptr = (VertexType*)Mappedresource.pData;
+
+	auto vertices = new VertexType[m_vertexCount];
+	vertices[0].position = m_obj->GetPoint(0);  // 左下
+	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
+	vertices[1].position = m_obj->GetPoint(1);  // 左上
+	vertices[1].texture = XMFLOAT2(0.0f, 0.0f);
+	vertices[2].position = m_obj->GetPoint(2);  // 右下
+	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
+	vertices[3].position = m_obj->GetPoint(3);  // 右上
+	vertices[3].texture = XMFLOAT2(1.0f, 0.0f);
+
+	memcpy (verticesptr, (void*) vertices, (sizeof (VertexType) * m_vertexCount));
+
+	deviceContext->Unmap (m_vertexBuffer, 0);
+	delete [] vertices;
+	vertices = 0;
 }
 
 
-void SquareDrawer::Shutdown()
+void RectDrawer::Shutdown()
 {
 	ReleaseTexture();
 	// Shutdown the vertex and index buffers.
@@ -62,13 +77,13 @@ void SquareDrawer::Shutdown()
 	return;
 }
 
-void SquareDrawer::SetSquare(Square* obj)
+void RectDrawer::SetSquare(Rect* obj)
 {
 	m_obj = obj;
 }
 
 
-void SquareDrawer::Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
+void RectDrawer::Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
@@ -79,12 +94,12 @@ void SquareDrawer::Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XM
 }
 
 
-int SquareDrawer::GetIndexCount()
+int RectDrawer::GetIndexCount()
 {
 	return m_indexCount;
 }
 
-bool SquareDrawer::InitializeBuffers(ID3D11Device* device)
+bool RectDrawer::InitializeBuffers(ID3D11Device* device)
 {
 	VertexType* vertices;
 	unsigned long* indices;
@@ -132,10 +147,10 @@ bool SquareDrawer::InitializeBuffers(ID3D11Device* device)
 	indices[5] = 2;  // Bottom right.
 
 	// Set up the description of the static vertex buffer.
-    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vertexBufferDesc.CPUAccessFlags = 0;
+    vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
@@ -182,7 +197,7 @@ bool SquareDrawer::InitializeBuffers(ID3D11Device* device)
 }
 
 
-void SquareDrawer::ShutdownBuffers()
+void RectDrawer::ShutdownBuffers()
 {
 	// Release the index buffer.
 	if(m_indexBuffer)
@@ -202,7 +217,7 @@ void SquareDrawer::ShutdownBuffers()
 }
 
 
-void SquareDrawer::RenderBuffers(ID3D11DeviceContext* deviceContext)
+void RectDrawer::RenderBuffers(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -224,7 +239,7 @@ void SquareDrawer::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool SquareDrawer::LoadTexture(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR filename)
+bool RectDrawer::LoadTexture(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR filename)
 {
 	bool result;
 
@@ -260,7 +275,7 @@ bool SquareDrawer::LoadTexture(HWND hwnd, ID3D11Device* device, ID3D11DeviceCont
 	return true;
 }
 
-void SquareDrawer::ReleaseTexture()
+void RectDrawer::ReleaseTexture()
 {
 	// Release the texture object.
 	if (m_Texture)
@@ -277,17 +292,6 @@ void SquareDrawer::ReleaseTexture()
 	}
 
 	return;
-}
-
-CircleDrawer::CircleDrawer()
-{
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
-	m_Texture = 0;
-}
-
-CircleDrawer::CircleDrawer(const CircleDrawer&)
-{
 }
 
 bool CircleDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
@@ -315,7 +319,7 @@ bool CircleDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceConte
 	return true;
 }
 
-void CircleDrawer::Update()
+void CircleDrawer::Update(ID3D11DeviceContext* deviceContext)
 {
 }
 
@@ -350,8 +354,7 @@ bool CircleDrawer::InitializeBuffers(ID3D11Device* device)
 
 
 	int count = 0;
-	XMFLOAT3 c;
-	XMStoreFloat3(&c, m_obj->GetCenter());
+	XMFLOAT3 c = m_obj->GetCenter();
 	auto r = m_obj->GetRadius();
 	auto num = m_obj->GetStrides();
 	float Step = PI * 2.0 / num;

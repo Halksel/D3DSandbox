@@ -17,7 +17,7 @@ public:
 	ObjectDrawer();
 
 	virtual bool Initialize(HWND, ID3D11Device*, ID3D11DeviceContext*, LPCSTR) = 0;
-	virtual void Update() = 0;
+	virtual void Update(ID3D11DeviceContext* deviceContext) = 0;
 	virtual void Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj) = 0;
 	virtual void Shutdown() = 0;
 
@@ -28,9 +28,9 @@ private:
 
 };
 
-class Square;
+class Rect;
 
-class SquareDrawer : public ObjectDrawer
+class RectDrawer : public ObjectDrawer
 {
 private:
 	struct VertexType
@@ -40,15 +40,19 @@ private:
 	};
 
 public:
-	explicit SquareDrawer();
-	explicit SquareDrawer(const SquareDrawer&);
-	~SquareDrawer();
+	explicit RectDrawer() = default;
+	explicit RectDrawer(const RectDrawer&) = default;
+	explicit RectDrawer(RectDrawer&&) = default;
+	RectDrawer& operator=(RectDrawer&&) = default;
+	RectDrawer& operator=(const RectDrawer&);
+
+	~RectDrawer();
 
 	bool Initialize(HWND, ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
-	void Update();
+	void Update(ID3D11DeviceContext* deviceContext);
 	void Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj);
 	void Shutdown();
-	void SetSquare(Square*);
+	void SetSquare(Rect*);
 
 	int GetIndexCount();
 
@@ -66,7 +70,7 @@ private:
 	int m_vertexCount, m_indexCount;
 	TextureClass* m_Texture;
 	TextureShaderClass* m_TextureShader;
-	Square* m_obj;
+	Rect* m_obj;
 };
 
 class Circle;
@@ -78,11 +82,14 @@ public:
 		XMFLOAT3 position;
 		XMFLOAT2 texture ;
 	};
-	explicit CircleDrawer();
-	explicit CircleDrawer(const CircleDrawer&);
+	explicit CircleDrawer() = default;
+	explicit CircleDrawer(const CircleDrawer&) = default;
+	explicit CircleDrawer(CircleDrawer&&) = default;
+	CircleDrawer& operator=(CircleDrawer&&) = default;
+	CircleDrawer& operator=(const CircleDrawer&) = default;
 
 	bool Initialize(HWND, ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
-	void Update();
+	void Update(ID3D11DeviceContext* deviceContext);
 	void Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj);
 	void Shutdown();
 

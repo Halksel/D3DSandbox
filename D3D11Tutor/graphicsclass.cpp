@@ -153,6 +153,7 @@ bool GraphicsClass::Render()
 	for(auto obj : m_Game.GetObjectHolder())
 	{
 		if (obj != nullptr) {
+			obj->GetDrawer()->Update(m_Direct3D->GetDeviceContext());
 			obj->GetDrawer()->Render(m_Direct3D->GetDeviceContext(), worldMatrix, viewMatrix, projectionMatrix);
 		}
 	}

@@ -1,6 +1,6 @@
 #include "gameclass.h"
 
-GameClass::GameClass() : square(Square()){
+GameClass::GameClass() : m_bar(Bar()){
 	m_ObjectHolder.reserve(256);
 	for (size_t i = 0; i < HolderSize; i++)
 	{
@@ -10,11 +10,13 @@ GameClass::GameClass() : square(Square()){
 
 bool GameClass::Initialize(int width, int height) {
 
-	AddObject(new Circle("ball", XMFLOAT3(0, -5, 0), 3, 50));
+	m_bar = Bar("bar", XMFLOAT3(-2, -8, 0), XMFLOAT3(4, 0.5f, 0));
+	AddObject(&m_bar);
+	AddObject(new Circle("ball", XMFLOAT3(0, -5, 0), 0.3, 50));
 	for (int j = 0; j < 4; ++j) {
 		for (int i = 0; i < 12; i++)
 		{
-			AddObject(new Square("test", XMFLOAT3(-6 + i, 8 - j, 0), XMFLOAT3(1, 1, 0)));
+			AddObject(new Rect("test", XMFLOAT3(-6 + i, 8 - j, 0), XMFLOAT3(1, 1, 0)));
 		}
 	}
 	return true;
@@ -26,12 +28,13 @@ void GameClass::Shutdown()
 		if (obj != nullptr) {
 			obj->Shutdown();
 			obj->GetDrawer()->Shutdown();
+//			delete obj;
 			obj = nullptr;
 		}
 	}
 }
 
-bool GameClass::Frame(const InputClass& input) {
+bool GameClass::Frame(InputClass& input) {
 
 	for (auto& obj : m_ObjectHolder) {
 		if (obj != nullptr) {

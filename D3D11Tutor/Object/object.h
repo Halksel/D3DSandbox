@@ -3,10 +3,12 @@
 #include<string>
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <vector>
 
 #include "objectdrawer.h"
 #include "../inputclass.h"
 #include "../modelclass.h"
+#include "../utility.h"
 
 #pragma comment(lib, "dxguid.lib")
 
@@ -19,14 +21,15 @@ public:
 	Object();
 	enum ObjectType {
 		OBJECT = 0,
-		SQUARE,
+		RECT,
+		CIRCLE,
 		MAX
 	};
 
 	bool Initialize();
 	virtual bool OnInitialize() = 0;
-	void Update(const InputClass&);
-	virtual void OnUpdate(const InputClass&) = 0;
+	void Update(InputClass&);
+	virtual void OnUpdate(InputClass&) = 0;
 	void Shutdown();
 	virtual void OnShutdown() = 0;
 	ObjectDrawer* GetDrawer();
@@ -35,6 +38,7 @@ public:
 	std::string GetName();
 	void SetName(std::string);
 	ObjectType GetType();
+	virtual bool IsCross(Object*) = 0;
 
 protected:
 	std::string m_Name;
@@ -44,33 +48,38 @@ private:
 
 };
 
-class SquareDrawer;
+class RectDrawer;
 
-class Square : public Object {
+class Rect : public Object {
 public:
-	explicit Square();
-	explicit Square(std::string name, XMFLOAT3 p0 = XMFLOAT3(), XMFLOAT3 p1 = XMFLOAT3());
-	explicit Square(Square&&) = default;
-	Square& operator=(const Square&);
+	explicit Rect() = default;
+	explicit Rect(Rect const&) = default;
+	explicit Rect(Rect&&) = default;
+	//Rect& operator=(Rect &&) = default;
+	Rect& operator=(const Rect&);
+
+	explicit Rect(std::string name, XMFLOAT3 p0 = XMFLOAT3(), XMFLOAT3 p1 = XMFLOAT3());
 
 	bool OnInitialize() override;
-	void OnUpdate(const InputClass& input) override;
+	void OnUpdate(InputClass& input) override;
 	void OnShutdown() override;
 	ObjectDrawer* GetDrawerSub() override;
+	bool IsCross(Object*) override;
 
 	float GetWidth();
 	float GetHeight();
-	XMVECTOR GetCenter();
+	XMFLOAT3 GetCenter();
 
 	XMFLOAT3 GetPoint(int i);
 	void SetSquare(XMFLOAT3*, XMFLOAT3*);
+	void Move(XMFLOAT3 vector);
 
 protected:
-
+	std::vector<XMVECTOR> m_points;
+	bool CrossCircleRect(float L, float R, float T, float B, float x, float y, float radius);
 
 private:
-	XMVECTOR m_points[4];
-	SquareDrawer *m_Drawer;
+	RectDrawer *m_Drawer;
 };
 
 class CircleDrawer;
@@ -83,11 +92,12 @@ public:
 	Circle& operator=(const Circle&);
 
 	bool OnInitialize() override;
-	void OnUpdate(const InputClass& input) override;
+	void OnUpdate(InputClass& input) override;
 	void OnShutdown() override;
 	ObjectDrawer* GetDrawerSub() override;
+	bool IsCross(Object*) override;
 
-	XMVECTOR GetCenter();
+	XMFLOAT3 GetCenter();
 	float GetRadius();
 	int GetStrides();
 
