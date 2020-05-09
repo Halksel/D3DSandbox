@@ -17,7 +17,7 @@ Bar& Bar::operator=(const Bar& r)
 
 bool Bar::OnInitialize()
 {
-	return false;
+	return true;
 }
 
 void Bar::OnUpdate(InputClass& input)
@@ -25,10 +25,10 @@ void Bar::OnUpdate(InputClass& input)
 	Rect::OnUpdate(input);
 	float x = 0.0f, y = 0.0f;
 	if (input.IsKeyDown(DIK_A)) {
-		x = -1;
+		x = -m_Speed;
 	}
 	else if (input.IsKeyDown(DIK_D)) {
-		x = 1;
+		x = m_Speed;
 	}
 	Move(XMFLOAT3(x, y, 0));
 }

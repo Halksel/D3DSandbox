@@ -24,6 +24,7 @@
 #include "inputclass.h"
 #include "graphicsclass.h"
 #include "gameclass.h"
+#include "Time.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +56,7 @@ private:
 	InputClass& m_Input;
 	GraphicsClass& m_Graphics;
 	GameClass& m_Game;
+	TimeClass& m_Time;
 };
 
 

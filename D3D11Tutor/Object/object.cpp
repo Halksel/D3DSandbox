@@ -37,6 +37,16 @@ Object::ObjectType Object::GetType()
 	return m_Type;
 }
 
+void Object::AddCrossObject(Object* obj)
+{
+	m_CrossList.push_back(obj);
+}
+
+void Object::ResetCrossObject()
+{
+	m_CrossList.clear();
+}
+
 Rect::Rect(std::string name, XMFLOAT3 p0, XMFLOAT3 size)
 {
 	SetSquare(&p0, &size);

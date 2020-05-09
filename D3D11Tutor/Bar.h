@@ -18,4 +18,5 @@ protected:
 
 
 private:
+	float m_Speed = 0.5f;
 };

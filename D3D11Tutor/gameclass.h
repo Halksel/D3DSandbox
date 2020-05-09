@@ -6,6 +6,7 @@
 #include "cameraclass.h"
 #include "Object/object.h"
 #include "Bar.h"
+#include "Ball.h"
 #include <vector>
 
 class GameClass {
@@ -22,8 +23,9 @@ public:
 
 private:
 	CameraClass* m_Camera;
-	Bar m_bar;
+	Bar m_Bar;
+	Ball m_Ball;
 	std::vector<Object*> m_ObjectHolder;
-	int m_objIndex;
+	int m_ObjIndex;
 	const int HolderSize = 256;
 };

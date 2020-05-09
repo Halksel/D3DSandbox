@@ -8,7 +8,8 @@ SystemClass::SystemClass():
 	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
 	m_Input( Singleton<InputClass>::get_instance()),
 	m_Game(Singleton<GameClass>::get_instance()),
-	m_Graphics(Singleton<GraphicsClass>::get_instance())
+	m_Graphics(Singleton<GraphicsClass>::get_instance()),
+	m_Time(Singleton<TimeClass>::get_instance())
 {
 }
 
@@ -16,7 +17,8 @@ SystemClass::SystemClass():
 SystemClass::SystemClass(const SystemClass& other):
 	m_Input( Singleton<InputClass>::get_instance()),
 	m_Game(Singleton<GameClass>::get_instance()),
-	m_Graphics(Singleton<GraphicsClass>::get_instance())
+	m_Graphics(Singleton<GraphicsClass>::get_instance()),
+	m_Time(Singleton<TimeClass>::get_instance())
 {
 }
 
@@ -111,6 +113,7 @@ void SystemClass::Run()
 bool SystemClass::Frame()
 {
 	bool result;
+	m_Time.Frame();
 	m_Input.Frame();
 
 

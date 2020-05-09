@@ -39,10 +39,13 @@ public:
 	void SetName(std::string);
 	ObjectType GetType();
 	virtual bool IsCross(Object*) = 0;
+	void AddCrossObject(Object*);
+	void ResetCrossObject();
 
 protected:
 	std::string m_Name;
 	ObjectType m_Type;
+	std::vector<Object*> m_CrossList;
 
 private:
 
@@ -88,6 +91,7 @@ class Circle : public Object {
 public:
 	explicit Circle();
 	explicit Circle(std::string name, XMFLOAT3 p0, float r, int strides);
+	explicit Circle(Circle const&) = default;
 	explicit Circle(Circle&&) = default;
 	Circle& operator=(const Circle&);
 
@@ -101,9 +105,11 @@ public:
 	float GetRadius();
 	int GetStrides();
 
-private:
+protected:
 	XMVECTOR m_Center;
 	float m_Radius;
+
+private:
 	int m_Strides;
 	CircleDrawer* m_Drawer;
 };

@@ -1,6 +1,6 @@
 #include "gameclass.h"
 
-GameClass::GameClass() : m_bar(Bar()){
+GameClass::GameClass() : m_Bar(Bar()), m_Ball(Ball()){
 	m_ObjectHolder.reserve(256);
 	for (size_t i = 0; i < HolderSize; i++)
 	{
@@ -10,9 +10,10 @@ GameClass::GameClass() : m_bar(Bar()){
 
 bool GameClass::Initialize(int width, int height) {
 
-	m_bar = Bar("bar", XMFLOAT3(-2, -8, 0), XMFLOAT3(4, 0.5f, 0));
-	AddObject(&m_bar);
-	AddObject(new Circle("ball", XMFLOAT3(0, -5, 0), 0.3, 50));
+	m_Bar = Bar("bar", XMFLOAT3(-2, -8, 0), XMFLOAT3(4, 0.5f, 0));
+	AddObject(&m_Bar);
+	m_Ball = Ball(XMFLOAT3(-2, -8, 0), XMFLOAT3(4, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0), 0.3f);
+	AddObject(&m_Ball);
 	for (int j = 0; j < 4; ++j) {
 		for (int i = 0; i < 12; i++)
 		{
@@ -38,9 +39,29 @@ bool GameClass::Frame(InputClass& input) {
 
 	for (auto& obj : m_ObjectHolder) {
 		if (obj != nullptr) {
+			obj->ResetCrossObject();
+		}
+	}
+	for (auto& obj : m_ObjectHolder) {
+		if (obj != nullptr) {
 			obj->Update(input);
 		}
 	}
+	for (size_t i = 0; i < m_ObjectHolder.size(); i++)
+	{
+		if (m_ObjectHolder[i] != nullptr) {
+			for (size_t j = i + 1; j < m_ObjectHolder.size(); j++)
+			{
+				if (m_ObjectHolder[j] != nullptr) {
+					if (m_ObjectHolder[i]->IsCross(m_ObjectHolder[j])) {
+						m_ObjectHolder[i]->AddCrossObject(m_ObjectHolder[j]);
+						m_ObjectHolder[j]->AddCrossObject(m_ObjectHolder[i]);
+					}
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -51,11 +72,11 @@ void GameClass::SetCamera(CameraClass* camera)
 
 bool GameClass::AddObject(Object* obj)
 {
-	if (m_objIndex >= HolderSize) {
+	if (m_ObjIndex >= HolderSize) {
 		return false;
 	}
 
-	m_ObjectHolder[m_objIndex++] = obj;
+	m_ObjectHolder[m_ObjIndex++] = obj;
 	return true;
 }
 
