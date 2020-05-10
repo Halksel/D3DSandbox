@@ -4,8 +4,8 @@
 
 class Ball : public Circle {
 public:
-	explicit Ball();
-	explicit Ball(XMFLOAT3 p, XMFLOAT3 v, XMFLOAT3 a, float r);
+	explicit Ball() = default;
+	explicit Ball(XMFLOAT3 p, float v, float deg, float r);
 	explicit Ball(Ball const&) = default;
 	explicit Ball(Ball&&) = default;
 	Ball& operator=(Ball&&) = default;
@@ -14,14 +14,17 @@ public:
 	bool OnInitialize() override;
 	void OnUpdate(InputClass& input) override;
 	void OnShutdown() override;
+	void OnCollisionAfter() override;
 private:
 
 private:
 	float m_Rad;
+	float m_InitRad;
+	float m_Velocity;
 	XMFLOAT3 m_InitPoint;
-	XMFLOAT3 m_InitVector;
+	XMFLOAT3 m_BeforePoint;
+	XMFLOAT3 m_DeltaVector;
 	XMFLOAT3 m_Vector;
-	XMFLOAT3 m_Accelete;
 
 	float MaxSpeed = 2.0f;
 };

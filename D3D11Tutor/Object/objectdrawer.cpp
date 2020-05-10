@@ -54,10 +54,10 @@ void RectDrawer::Update(ID3D11DeviceContext* deviceContext)
 	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
 	vertices[1].position = m_obj->GetPoint(1);  // 左上
 	vertices[1].texture = XMFLOAT2(0.0f, 0.0f);
-	vertices[2].position = m_obj->GetPoint(2);  // 右下
-	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
-	vertices[3].position = m_obj->GetPoint(3);  // 右上
-	vertices[3].texture = XMFLOAT2(1.0f, 0.0f);
+	vertices[2].position = m_obj->GetPoint(2);  // 右上
+	vertices[2].texture = XMFLOAT2(1.0f, 0.0f);
+	vertices[3].position = m_obj->GetPoint(3);  // 右下
+	vertices[3].texture = XMFLOAT2(1.0f, 1.0f);
 
 	memcpy (verticesptr, (void*) vertices, (sizeof (VertexType) * m_vertexCount));
 
@@ -133,18 +133,18 @@ bool RectDrawer::InitializeBuffers(ID3D11Device* device)
 	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
 	vertices[1].position = m_obj->GetPoint(1);  // 左上
 	vertices[1].texture = XMFLOAT2(0.0f, 0.0f);
-	vertices[2].position = m_obj->GetPoint(2);  // 右下
-	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
-	vertices[3].position = m_obj->GetPoint(3);  // 右上
-	vertices[3].texture = XMFLOAT2(1.0f, 0.0f);
+	vertices[2].position = m_obj->GetPoint(2);  // 右上
+	vertices[2].texture = XMFLOAT2(1.0f, 0.0f);
+	vertices[3].position = m_obj->GetPoint(3);  // 右下
+	vertices[3].texture = XMFLOAT2(1.0f, 1.0f);
 
 	// Load the index array with data.
-	indices[0] = 0;  // Bottom left.
-	indices[1] = 1;  // Top middle.
-	indices[2] = 2;  // Bottom right.
-	indices[3] = 1;  // Bottom left.
-	indices[4] = 3;  // Top middle.
-	indices[5] = 2;  // Bottom right.
+	indices[0] = 0;  
+	indices[1] = 1;  
+	indices[2] = 3;  
+	indices[3] = 1;  
+	indices[4] = 2;  
+	indices[5] = 3;  
 
 	// Set up the description of the static vertex buffer.
     vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -294,6 +294,11 @@ void RectDrawer::ReleaseTexture()
 	return;
 }
 
+CircleDrawer& CircleDrawer::operator=(const CircleDrawer& r)
+{
+	return *this = CircleDrawer(r);
+}
+
 bool CircleDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCSTR textureFilename)
 {
 	if (m_initialized) return true;
@@ -321,6 +326,42 @@ bool CircleDrawer::Initialize(HWND hwnd, ID3D11Device* device, ID3D11DeviceConte
 
 void CircleDrawer::Update(ID3D11DeviceContext* deviceContext)
 {
+	D3D11_MAPPED_SUBRESOURCE Mappedresource;
+	deviceContext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &Mappedresource);
+
+	VertexType* verticesptr;
+	verticesptr = (VertexType*)Mappedresource.pData;
+
+	int count = 0;
+	XMFLOAT3 c = m_obj->GetCenter();
+	auto r = m_obj->GetRadius();
+	auto num = m_obj->GetStrides();
+	float Step = PI * 2.0 / num;
+
+	auto vertices = new VertexType[m_vertexCount];
+
+	count = 0;
+	vertices[count].position = XMFLOAT3(c.x, c.y, 0);
+	vertices[count].texture = XMFLOAT2(0.5f, 0.5f);
+	count = 1;
+	for (float a=0; a < PI*2.0; a += Step)
+	{
+		float cosa = cos(a);
+		float sina = sin(a);
+		float X1 = r * cosa + c.x;
+		float Y1 = r * sina + c.y;
+		vertices[count].position = XMFLOAT3(X1, Y1, 0);
+		//vertices[count].texture = XMFLOAT2(cosa * 0.5f + 0.5f, sina* 0.5f + 0.5f);
+		vertices[count].texture = XMFLOAT2(0.3f, 0.5f);
+
+		count += 1;
+	}
+
+	memcpy (verticesptr, (void*) vertices, (sizeof (VertexType) * m_vertexCount));
+
+	deviceContext->Unmap (m_vertexBuffer, 0);
+	delete [] vertices;
+	vertices = 0;
 }
 
 void CircleDrawer::Render(ID3D11DeviceContext* deviceContext, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
@@ -407,10 +448,10 @@ bool CircleDrawer::InitializeBuffers(ID3D11Device* device)
 		count++;
 	}
 
-    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vertexBufferDesc.CPUAccessFlags = 0;
+    vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 

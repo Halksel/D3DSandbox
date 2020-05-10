@@ -86,7 +86,7 @@ public:
 	explicit CircleDrawer(const CircleDrawer&) = default;
 	explicit CircleDrawer(CircleDrawer&&) = default;
 	CircleDrawer& operator=(CircleDrawer&&) = default;
-	CircleDrawer& operator=(const CircleDrawer&) = default;
+	CircleDrawer& operator=(const CircleDrawer&);
 
 	bool Initialize(HWND, ID3D11Device*, ID3D11DeviceContext*, LPCSTR);
 	void Update(ID3D11DeviceContext* deviceContext);

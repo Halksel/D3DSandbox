@@ -54,7 +54,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	// Create the model object.
 	// Initialize the model object.
-	for(auto obj : m_Game.GetObjectHolder())
+	for(auto& obj : m_Game.GetObjectHolder())
 	{
 		if (obj != nullptr) {
 			result &= obj->GetDrawer()->Initialize(hwnd, m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/color.tga");
@@ -91,7 +91,6 @@ void GraphicsClass::Shutdown()
 	if (m_TextureShader)
 	{
 		m_TextureShader->Shutdown();
-		delete m_TextureShader;
 		m_TextureShader = 0;
 	}
 
@@ -99,7 +98,6 @@ void GraphicsClass::Shutdown()
 	// Release the camera object.
 	if (m_Camera)
 	{
-		delete m_Camera;
 		m_Camera = 0;
 	}
 
@@ -107,7 +105,6 @@ void GraphicsClass::Shutdown()
 	if(m_Direct3D)
 	{
 		m_Direct3D->Shutdown();
-		delete m_Direct3D;
 		m_Direct3D = 0;
 	}
 
@@ -150,7 +147,7 @@ bool GraphicsClass::Render()
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	for(auto obj : m_Game.GetObjectHolder())
+	for(auto& obj : m_Game.GetObjectHolder())
 	{
 		if (obj != nullptr) {
 			obj->GetDrawer()->Update(m_Direct3D->GetDeviceContext());

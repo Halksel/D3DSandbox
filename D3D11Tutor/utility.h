@@ -6,6 +6,8 @@
 #include <directxmath.h>
 
 #define PI 3.14159265
+#define Deg2Rad 0.01745329251
+#define Rad2Deg 57.2957795131
 
 #ifdef _DEBUG
 #   define MyOutputDebugString( str, ... ) \

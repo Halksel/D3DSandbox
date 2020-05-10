@@ -7,7 +7,9 @@
 #include "Object/object.h"
 #include "Bar.h"
 #include "Ball.h"
+
 #include <vector>
+#include <memory>
 
 class GameClass {
 public:
@@ -15,17 +17,18 @@ public:
 	bool Initialize(int, int);
 	void Shutdown();
 	bool Frame(InputClass&);
-	void SetCamera(CameraClass*);
 
-	bool AddObject(Object*);
+	template<class T>
+	std::shared_ptr<Object> AddObject(std::unique_ptr<T>&&);
+	template<class T>
+	std::shared_ptr<Object> AddObject(std::shared_ptr<T>&);
 
-	std::vector < Object*> GetObjectHolder();
+	std::vector <std::shared_ptr<Object>>& GetObjectHolder();
 
 private:
-	CameraClass* m_Camera;
-	Bar m_Bar;
-	Ball m_Ball;
-	std::vector<Object*> m_ObjectHolder;
+	shared_ptr<Bar> m_Bar;
+	shared_ptr<Ball> m_Ball;
+	std::vector<std::shared_ptr<Object>> m_ObjectHolder;
 	int m_ObjIndex;
 	const int HolderSize = 256;
 };

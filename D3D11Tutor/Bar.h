@@ -13,6 +13,7 @@ public:
 
 	bool OnInitialize() override;
 	void OnUpdate(InputClass& input) override;
+	void OnCollisionAfter() override;
 	void OnShutdown() override;
 protected:
 

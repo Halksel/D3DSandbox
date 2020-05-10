@@ -7,6 +7,7 @@ https://qiita.com/kikuuuty/items/fcf5f7df2f0493c437dc
 
 #include <cassert>
 #include <mutex>
+#include <iostream>
 
 class SingletonFinalizer {
 public:
@@ -31,7 +32,14 @@ private:
     }
 
     static void destroy() {
-        delete instance;
+        try {
+            if (instance != nullptr) {
+                delete instance;
+            }
+        }
+        catch (const std::exception& e) {
+             std::cout << e.what();
+        }
         instance = nullptr;
     }
 
