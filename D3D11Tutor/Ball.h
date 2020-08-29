@@ -15,6 +15,8 @@ public:
 	void OnUpdate(InputClass& input) override;
 	void OnShutdown() override;
 	void OnCollisionAfter() override;
+
+	void SetRadian(float rad);
 private:
 
 private:

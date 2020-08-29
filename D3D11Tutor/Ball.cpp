@@ -26,6 +26,9 @@ bool Ball::OnInitialize()
 void Ball::OnUpdate(InputClass& input)
 {
 	if (m_Vector.x == 0) return;
+	if (input.IsKeyTrigger(DIK_L)) {
+		m_Rad = 45.0f * Deg2Rad;
+	}
 	m_Vector = XMFLOAT3(m_Velocity* cos(m_Rad), m_Velocity* sin(m_Rad), 0.0f);
 	auto p = GetCenter();
 	m_BeforePoint = GetCenter();
@@ -69,4 +72,9 @@ void Ball::OnCollisionAfter()
 			break;
 		}
 	}
+}
+
+void Ball::SetRadian(float rad)
+{
+	m_Rad = rad;
 }

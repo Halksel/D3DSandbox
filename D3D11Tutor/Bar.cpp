@@ -1,4 +1,6 @@
 #include "Bar.h"
+#include "Ball.h"
+#include "utility.h"
 using namespace DirectX;
 
 Bar::Bar()
@@ -43,7 +45,13 @@ void Bar::OnCollisionAfter() {
 		if (!obj.expired()) {
 			auto pt = obj.lock();
 			if (pt != nullptr) {
-				pt->GetType();
+				if (pt->GetType() == ObjectType::BALL) {
+					auto ball = std::dynamic_pointer_cast<Ball>(pt);
+					auto width = GetWidth() * 0.5f;
+					auto diff = GetCenter().x - ball->GetCenter().x;
+					auto value = min(1.0f, abs(diff / width)) * (signbit(diff) ? 1 : -1 );
+					ball->SetRadian( acos(value));
+				}
 			}
 		}
 	}

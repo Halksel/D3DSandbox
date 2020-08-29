@@ -19,5 +19,5 @@ protected:
 
 
 private:
-	float m_Speed = 0.5f;
+	float m_Speed = 0.1f;
 };
